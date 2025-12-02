@@ -29,22 +29,19 @@ def split_digits_into_chunks(x: int, *, n_chunks: int) -> list[int]:
 
 
 def sum_invalid_ids_in_fixed_digit_range(r_start: int, r_end: int, *, only_doubles: bool) -> int:
+    r = range(r_start, r_end + 1)
     digit_count = count_digits(r_start)
     invalid_ids: set[int] = set()
     max_chunks = 2 if only_doubles else digit_count  # part 1 vs part 2
     for n_chunks in range(2, max_chunks + 1):
         if digit_count % n_chunks != 0:
             continue
-        search_start, *other_chunks = split_digits_into_chunks(r_start, n_chunks=n_chunks)
-        if any(chunk > search_start for chunk in other_chunks):
-            search_start += 1
-        search_end, *other_chunks = split_digits_into_chunks(r_end, n_chunks=n_chunks)
-        if any(chunk < search_end for chunk in other_chunks):
-            search_end -= 1
-        invalid_ids.update(
-            int("".join([str(x)] * n_chunks))
-            for x in range(search_start, search_end + 1)
-        )
+        search_start = min(split_digits_into_chunks(r_start, n_chunks=n_chunks))
+        search_end = max(split_digits_into_chunks(r_end, n_chunks=n_chunks))
+        for x in range(search_start, search_end + 1):
+            id_ = int("".join([str(x)] * n_chunks))
+            if id_ in r:
+                invalid_ids.add(id_)
     return sum(invalid_ids)
 
 
@@ -78,7 +75,6 @@ def main():
     print(f"Part 1: {invalid_ids_sum = }")
     invalid_ids_sum = sum_invalid_ids(ranges, only_doubles=False)
     print(f"Part 2: {invalid_ids_sum = }")
-    # 25027947512 is too LOW
 
 
 if __name__ == "__main__":
