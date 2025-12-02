@@ -1,3 +1,4 @@
+import itertools
 from typing import cast
 
 from utils import get_input_file_path
@@ -23,8 +24,8 @@ def split_digits_into_chunks(x: int, *, n_chunks: int) -> list[int]:
     x_str = str(x)
     chunk_size = len(x_str) // n_chunks
     return [
-        int(x_str[(i * chunk_size) : (i + 1) * chunk_size])
-        for i in range(n_chunks)
+        int("".join(chunk))
+        for chunk in itertools.batched(x_str, chunk_size, strict=True)
     ]
 
 
