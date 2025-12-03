@@ -8,10 +8,6 @@ def count_digits(x: int) -> int:
     return len(str(x))
 
 
-def is_even(n: int) -> bool:
-    return n % 2 == 0
-
-
 def min_with_n_digits(n: int) -> int:
     return 10 ** (n - 1)
 
