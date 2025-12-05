@@ -1,4 +1,3 @@
-import itertools
 import re
 
 from utils import get_input_file_path
@@ -31,24 +30,25 @@ def main():
             except Exception:
                 print(f"ERROR on input file line {line_number}")
                 raise
-    fresh_ranges.sort(key=lambda r: r.start)  # essential for part 2 to work correctly
-    fresh_count = sum(
-        any(id_to_check in r for r in fresh_ranges)
-        for id_to_check in ids_to_check
-    )
-    print(f"{fresh_count = }")
+    if len(fresh_ranges) == 0:
+        raise ValueError("No fresh ranges found")
 
-    merged_ranges: list[range] = [fresh_ranges[0]]
-    for new_range in fresh_ranges:
+    fresh_ranges.sort(key=lambda r: r.start)  # essential for merging to work correctly
+    merged_ranges = [fresh_ranges[0]]
+    for new_range in fresh_ranges[1:]:
         for i, existing_range in enumerate(merged_ranges):
-            if (merged_range := ranges_union(new_range, existing_range)) is not None:
+            if (merged_range := ranges_union(existing_range, new_range)) is not None:
                 merged_ranges[i] = merged_range
                 break
         else:
             merged_ranges.append(new_range)
-    for r1, r2 in itertools.pairwise(merged_ranges):
-        if ranges_union(r1, r2) is not None:
-            print("BAD")
+
+    fresh_count = sum(
+        any(id_to_check in r for r in merged_ranges)
+        for id_to_check in ids_to_check
+    )
+    print(f"{fresh_count = }")
+
     n_fresh_total = sum(len(r) for r in merged_ranges)
     print(f"{n_fresh_total = }")
 
