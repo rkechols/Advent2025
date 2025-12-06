@@ -1,16 +1,7 @@
 import itertools
 import re
-from collections.abc import Iterable
 
-from utils import get_input_file_path
-
-
-def product(values: Iterable[int]) -> int:
-    prod = 1
-    for value in values:
-        prod *= value
-    return prod
-
+from utils import get_input_file_path, product
 
 OPERATORS = {
     "+": sum,
