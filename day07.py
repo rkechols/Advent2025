@@ -7,10 +7,10 @@ START = "S"
 SPLITTER = "^"
 
 
-def main():
+def get_input() -> tuple[int, list[set[int]]]:
     line_lengths: set[int] = set()
-    starting_col = -1
-    splitter_rows: list[set[int]] = []
+    starting_col: int | None = None
+    splitters: list[set[int]] = []
     with open(get_input_file_path(7), "r", encoding="utf-8") as f:
         for line_number, line in enumerate(f, start=1):
             try:
@@ -22,7 +22,7 @@ def main():
                 if line_number == 1:
                     if chars != {EMPTY, START}:
                         raise ValueError(f"Unexpected line contents: {chars}")
-                    if starting_col != -1:
+                    if starting_col is not None:
                         raise ValueError(f"Oops: multiple starting lines?")
                     starting_columns = {i for i, char in enumerate(line) if char == START}
                     if len(starting_columns) != 1:
@@ -35,38 +35,41 @@ def main():
                     if chars != {EMPTY, SPLITTER}:
                         raise ValueError(f"Unexpected line contents: {chars}")
                     this_row_splitters = {i for i, char in enumerate(line) if char == SPLITTER}
-                    splitter_rows.append(this_row_splitters)
+                    splitters.append(this_row_splitters)
             except Exception:
                 print(f"ERROR on input file line {line_number}")
                 raise
-    if starting_col == -1:
+    if starting_col is None:
         raise ValueError("Never found start marker")
     if len(line_lengths) != 1:
         raise ValueError("Inconsistent line lengths")
-    line_length = next(iter(line_lengths))
+    return starting_col, splitters
+
+
+def main():
+    starting_col, splitters = get_input()
 
     beam_split_count = 0
-    current_columns = {starting_col: 1}
-    for this_row_splitters in splitter_rows:
-        new_columns: dict[int, int] = defaultdict(int)
+    counts_by_column_current = {starting_col: 1}
+    for this_row_splitters in splitters:
+        current_columns = set(counts_by_column_current)
+        counts_by_column_new: dict[int, int] = defaultdict(int)
         # what beams hit splitters?
-        splitter_hits = set(current_columns).intersection(this_row_splitters)
+        splitter_hits = current_columns.intersection(this_row_splitters)
         beam_split_count += len(splitter_hits)
-        for splitter in splitter_hits:
-            multiplicity = current_columns[splitter]
+        for col in splitter_hits:
+            multiplicity = counts_by_column_current[col]
             for shift in [-1, 1]:  # new beam on either side of the splitter
-                new_beam = splitter + shift
-                if not (0 <= new_beam < line_length):
-                    print("WARNING: beam out of bounds")
-                new_columns[new_beam] += multiplicity
+                new_col = col + shift
+                counts_by_column_new[new_col] += multiplicity
         # what beams miss splitters?
-        splitter_misses = set(current_columns) - this_row_splitters
-        for miss in splitter_misses:
-            new_columns[miss] += current_columns[miss]
+        splitter_misses = current_columns - this_row_splitters
+        for col in splitter_misses:
+            counts_by_column_new[col] += counts_by_column_current[col]
         # prep for next iteration
-        current_columns = new_columns
+        counts_by_column_current = counts_by_column_new
     print(f"{beam_split_count = }")
-    timeline_count = sum(current_columns.values())
+    timeline_count = sum(counts_by_column_current.values())
     print(f"{timeline_count = }")
 
 
