@@ -1,9 +1,9 @@
 import itertools
 import re
-from collections import defaultdict
 from collections.abc import Sequence
 
 import numpy as np
+from numpy import linalg
 
 from utils import get_input_file_path
 
@@ -71,62 +71,39 @@ class Machine:
                     return len(needed_buttons) + n_chosen
         raise ValueError(f"Could not find button config to match lights")
 
-    def get_unsolved_joltages(self, joltages: np.ndarray) -> set[int]:
-        return {
-            i
-            for i, is_match in enumerate(joltages == self.target_joltages)
-            if is_match
-        }
-
-    def joltages_match(self, joltages: np.ndarray) -> bool:
-        return np.array_equal(self.target_joltages, joltages)
-
     def min_presses_to_match_joltages(self) -> int:
-        joltages = np.zeros(self.n, dtype=int)
+        mat_a = np.array(self.buttons, dtype=int).T
+        vec_b = self.target_joltages
 
-        needed_buttons: dict[int, int] = {}
-        while True:
-            # find unsolved joltages only connected to 1 unknown button
-            found_needed_button = False
-            joltage_diffs = self.target_joltages - joltages
-            for joltage_diff_i, joltage_diff in enumerate(joltage_diffs):
-                joltage_diff = int(joltage_diff)
-                if joltage_diff == 0:
-                    continue
-                connected_buttons = {
-                    button_i
-                    for button_i, button in enumerate(self.buttons)
-                    if button[joltage_diff_i]
-                }
-                if len(connected_buttons) == 1:
-                    found_needed_button = True
-                    needed_button_i = next(iter(connected_buttons))
-                    if needed_button_i in needed_buttons:
-                        raise ValueError("Oops! Should've added instead of overwriting")
-                    needed_buttons[needed_button_i] = joltage_diff
-                    joltages += (joltage_diff * self.buttons[needed_button_i])
-                    break
-            if not found_needed_button:
-                break
+        rank = linalg.matrix_rank(mat_a)
+        lowest_sum: int | None = None
+        for columns in itertools.combinations(range(mat_a.shape[1]), r=rank):
+            mat_a_slim = mat_a[:, columns]
+            n_rows, n_cols = mat_a_slim.shape
+            # solve matrix equation
+            try:
+                if n_rows < n_cols:
+                    raise ValueError("Matrix rank greater than number of rows / joltages")
+                elif n_rows > n_cols:
+                    vec_x = linalg.inv(mat_a_slim.T @ mat_a_slim) @ mat_a_slim.T @ vec_b
+                else:  # square
+                    vec_x = linalg.solve(mat_a_slim, vec_b)
+            except linalg.LinAlgError:
+                continue
+            vec_x_rounded = np.round(vec_x)
+            if not np.allclose(vec_x, vec_x_rounded):
+                continue
+            if np.any(vec_x_rounded < 0):
+                continue
+            # map back
+            this_sum = round(vec_x_rounded.sum())
+            if lowest_sum is None or this_sum < lowest_sum:
+                lowest_sum = this_sum
+        if lowest_sum is not None:
+            return lowest_sum
 
-        if self.joltages_match(joltages):
-            return sum(needed_buttons.values())
-
-        buttons_unknown = [i for i in range(len(self.buttons)) if i not in needed_buttons]
-        if len(buttons_unknown) == 0:
-            raise ValueError("All buttons known, but joltages still don't match?")
-
+        print("NOPE")
         return 0
-        n_buttons_unknown = len(buttons_unknown)
-        for n_chosen in range(1, n_buttons_unknown + 1):
-            for chosen_buttons in itertools.combinations(buttons_unknown, r=n_chosen):
-                result = lights + sum(
-                    self.buttons[button]
-                    for button in chosen_buttons
-                )
-                if self.lights_match(result):
-                    return len(needed_buttons) + n_chosen
-        raise ValueError(f"Could not find a matching button config")
 
 
 def main():
