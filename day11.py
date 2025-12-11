@@ -1,3 +1,7 @@
+import itertools
+import math
+from collections.abc import Sequence
+
 from utils import get_input_file_path
 
 START = "you"
@@ -5,10 +9,11 @@ END = "out"
 
 
 class Solver:
-    def __init__(self, graph: dict[str, set[str]]):
+    def __init__(self, graph: dict[str, set[str]], *, start: str, end: str):
         super().__init__()
         self.graph = graph
-        self._cache: dict[str, int] = {END: 1}
+        self._start = start
+        self._cache: dict[str, int] = {end: 1}
 
     def _dfs_count(self, path: list[str]) -> int:
         current = path[-1]
@@ -17,16 +22,15 @@ class Solver:
         except KeyError:
             pass
         total = 0
-        for neighbor in self.graph[current]:
+        for neighbor in self.graph.get(current, []):
             if neighbor in path:
-                print("CYCLE ALERT!!")
-                continue
+                raise RuntimeError("CYCLE ALERT!!")
             total += self._dfs_count(path + [neighbor])
         self._cache[current] = total
         return total
 
     def count_paths_to_end(self) -> int:
-        return self._dfs_count([START])
+        return self._dfs_count([self._start])
 
 
 def main():
@@ -40,9 +44,22 @@ def main():
             except Exception:
                 print(f"ERROR on input file line {line_number}")
                 raise
-    solver = Solver(graph)
-    n_paths_to_end = solver.count_paths_to_end()
-    print(f"{n_paths_to_end = }")
+
+    n_paths = Solver(graph, start="you", end="out").count_paths_to_end()
+    print(f"Part 1: {n_paths = }")
+
+    # part 2
+    n_paths = sum(
+        math.prod(
+            Solver(graph, start=a, end=b).count_paths_to_end()
+            for a, b in itertools.pairwise(net_path)
+        )
+        for net_path in [
+            ["svr", "dac", "fft", "out"],
+            ["svr", "fft", "dac", "out"],
+        ]
+    )
+    print(f"Part 2: {n_paths = }")
 
 
 if __name__ == "__main__":
