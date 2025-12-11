@@ -23,10 +23,10 @@ def get_input() -> tuple[int, list[set[int]]]:
                     if chars != {EMPTY, START}:
                         raise ValueError(f"Unexpected line contents: {chars}")
                     if starting_col is not None:
-                        raise ValueError(f"Oops: multiple starting lines?")
+                        raise ValueError("Oops: multiple starting lines?")
                     starting_columns = {i for i, char in enumerate(line) if char == START}
                     if len(starting_columns) != 1:
-                        raise ValueError(f"Unexpected number of starting locations")
+                        raise ValueError("Unexpected number of starting locations")
                     starting_col = next(iter(starting_columns))
                 elif line_number % 2 == 0:
                     if chars != {EMPTY}:

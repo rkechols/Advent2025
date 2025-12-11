@@ -22,7 +22,7 @@ def main():
                 turn_direction, turn_count = RE_DIAL_TURN.fullmatch(line.strip()).groups()
                 turn_count = int(turn_count)
                 if turn_count == 0:
-                    raise ValueError(f"Unexpected turn_count value of 0")
+                    raise ValueError("Unexpected turn_count value of 0")
                 turn_count *= DIRECTION_TO_SIGN[turn_direction]
                 dial_before = dial
                 dial += turn_count

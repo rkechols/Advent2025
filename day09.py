@@ -3,7 +3,7 @@ import itertools
 import math
 from functools import cache
 
-from utils import get_input_file_path, Loc
+from utils import Loc, get_input_file_path
 
 
 @cache
@@ -11,7 +11,7 @@ def get_area(tile_a: Loc, tile_b: Loc) -> int:
     return math.prod(
         abs(dim_a - dim_b) + 1
         for dim_a, dim_b in zip(tile_a, tile_b)
-    )
+    )  # fmt: skip
 
 
 @dataclasses.dataclass
@@ -47,7 +47,7 @@ def main():
         (tiles[i], tiles[j])
         for i in range(n - 1)
         for j in range(i + 1, n)
-    ]
+    ]  # fmt: skip
     boxes.sort(key=lambda box: get_area(*box), reverse=True)
 
     biggest_area_at_all = get_area(*boxes[0])
@@ -55,7 +55,7 @@ def main():
 
     x_line_segments: list[LineSegmentX] = []
     y_line_segments: list[LineSegmentY] = []
-    for tile_a, tile_b in itertools.pairwise(tiles + [tiles[0]]):
+    for tile_a, tile_b in itertools.pairwise([*tiles, tiles[0]]):
         if tile_a == tile_b:
             raise ValueError("no movement?")
         if tile_a[0] == tile_b[0]:  # same x; moving in y
@@ -76,13 +76,13 @@ def main():
         if any(
             (min_y < seg.y < max_y) and not (seg.x_stop <= min_x or max_x <= seg.x_start)
             for seg in x_line_segments
-        ):
+        ):  # fmt: skip
             continue
 
         if any(
             (min_x < seg.x < max_x) and not (seg.y_stop <= min_y or max_y <= seg.y_start)
             for seg in y_line_segments
-        ):
+        ):  # fmt: skip
             continue
 
         biggest_area_filled = get_area(tile_a, tile_b)

@@ -1,5 +1,3 @@
-import re
-
 from utils import get_input_file_path
 
 

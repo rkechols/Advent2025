@@ -1,6 +1,5 @@
 import itertools
 import re
-from collections import defaultdict
 from collections.abc import Sequence
 
 import numpy as np
@@ -27,7 +26,7 @@ class Machine:
         self.buttons = [
             np.array([i in button_wiring for i in range(n)])
             for button_wiring in button_wirings
-        ]
+        ]  # fmt: skip
         if len(joltages) != n:
             raise ValueError("Differing number of joltages and lights")
         self.target_joltages = np.array(joltages)
@@ -49,7 +48,7 @@ class Machine:
                 button_i
                 for button_i, button in enumerate(self.buttons)
                 if button[target_light]
-            }
+            }  # fmt: skip
             if len(connected_buttons) == 1:
                 needed_buttons.add(next(iter(connected_buttons)))
 
@@ -66,17 +65,17 @@ class Machine:
                 result = lights + sum(
                     self.buttons[button_i]
                     for button_i in chosen_buttons
-                )
+                )  # fmt: skip
                 if self.lights_match(result):
                     return len(needed_buttons) + n_chosen
-        raise ValueError(f"Could not find button config to match lights")
+        raise ValueError("Could not find button config to match lights")
 
     def get_unsolved_joltages(self, joltages: np.ndarray) -> set[int]:
         return {
             i
             for i, is_match in enumerate(joltages == self.target_joltages)
             if is_match
-        }
+        }  # fmt: skip
 
     def joltages_match(self, joltages: np.ndarray) -> bool:
         return np.array_equal(self.target_joltages, joltages)
@@ -97,14 +96,14 @@ class Machine:
                     button_i
                     for button_i, button in enumerate(self.buttons)
                     if button[joltage_diff_i]
-                }
+                }  # fmt: skip
                 if len(connected_buttons) == 1:
                     found_needed_button = True
                     needed_button_i = next(iter(connected_buttons))
                     if needed_button_i in needed_buttons:
                         raise ValueError("Oops! Should've added instead of overwriting")
                     needed_buttons[needed_button_i] = joltage_diff
-                    joltages += (joltage_diff * self.buttons[needed_button_i])
+                    joltages += joltage_diff * self.buttons[needed_button_i]
                     break
             if not found_needed_button:
                 break
@@ -123,10 +122,10 @@ class Machine:
                 result = lights + sum(
                     self.buttons[button]
                     for button in chosen_buttons
-                )
+                )  # fmt: skip
                 if self.lights_match(result):
                     return len(needed_buttons) + n_chosen
-        raise ValueError(f"Could not find a matching button config")
+        raise ValueError("Could not find a matching button config")
 
 
 def main():
@@ -143,7 +142,7 @@ def main():
                 button_wirings = [
                     set(map(int, button_str.strip("()").split(",")))
                     for button_str in wiring.split(" ")
-                ]
+                ]  # fmt: skip
                 joltages = list(map(int, joltage.strip("{}").split(",")))
                 machine = Machine(lights, button_wirings, joltages)
                 min_presses_to_match_lights += machine.min_presses_to_match_lights()

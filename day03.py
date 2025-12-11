@@ -2,11 +2,10 @@ from collections.abc import Sequence
 
 from utils import get_input_file_path
 
-
 DIGITS_DESCENDING = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 
-def max_joltage_in_line(digits: Sequence[int], *, k: int):
+def max_joltage_in_line(digits: Sequence[int], *, k: int) -> int:
     n = len(digits)
     previous_chosen_index = -1
     chosen_digits: list[int] = []
@@ -21,7 +20,7 @@ def max_joltage_in_line(digits: Sequence[int], *, k: int):
             previous_chosen_index = target_digit_index
             break
         else:
-            raise ValueError(f"Goofed when finding max joltage")
+            raise ValueError("Goofed when finding max joltage")
     max_joltage = int("".join(str(d) for d in chosen_digits))
     return max_joltage
 

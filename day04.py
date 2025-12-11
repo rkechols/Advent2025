@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils import get_input_file_path, GridSolver, Loc
+from utils import GridSolver, Loc, get_input_file_path
 
 SYMBOL_TO_BOOL = {
     "@": True,  # roll
@@ -42,12 +42,9 @@ class Solver(GridSolver):
 def main():
     with open(get_input_file_path(4), "r", encoding="utf-8") as f:
         grid = np.array([
-            [
-                SYMBOL_TO_BOOL[c]
-                for c in line.strip()
-            ]
+            [SYMBOL_TO_BOOL[c] for c in line.strip()]
             for line in f
-        ])
+        ])  # fmt: skip
     solver = Solver(grid)
     initially_removable = solver.get_removables()
     print(f"# initially removable: {len(initially_removable)}")

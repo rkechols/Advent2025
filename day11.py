@@ -1,6 +1,5 @@
 import itertools
 import math
-from collections.abc import Sequence
 
 from utils import get_input_file_path
 
@@ -25,7 +24,7 @@ class Solver:
         for neighbor in self.graph.get(current, []):
             if neighbor in path:
                 raise RuntimeError("CYCLE ALERT!!")
-            total += self._dfs_count(path + [neighbor])
+            total += self._dfs_count([*path, neighbor])
         self._cache[current] = total
         return total
 
@@ -58,7 +57,7 @@ def main():
             ["svr", "dac", "fft", "out"],
             ["svr", "fft", "dac", "out"],
         ]
-    )
+    )  # fmt: skip
     print(f"Part 2: {n_paths = }")
 
 

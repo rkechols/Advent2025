@@ -15,7 +15,7 @@ def calculate_distance(box_a: Box, box_b: Box) -> float:
     return math.sqrt(sum(
         (coord_a - coord_b) ** 2
         for coord_a, coord_b in zip(box_a, box_b)
-    ))
+    ))  # fmt: skip
 
 
 class Solver:
@@ -43,7 +43,7 @@ class Solver:
             tup = self._distances[i]
         except IndexError as e:
             raise RuntimeError("No more things to join!") from e
-        box_a, box_b, distance = tup
+        box_a, box_b, _distance = tup
         self._next_to_join += 1
         circuit_a = self._circuit_memberships.get(box_a)
         circuit_b = self._circuit_memberships.get(box_b)
@@ -57,11 +57,11 @@ class Solver:
             else:  # a joins b
                 self._circuits[circuit_b].add(box_a)
                 self._circuit_memberships[box_a] = circuit_b
-        else:
+        else:  # noqa: PLR5501
             if circuit_b is None:  # b joins a
                 self._circuits[circuit_a].add(box_b)
                 self._circuit_memberships[box_b] = circuit_a
-            else:  # the two fully join
+            else:  # noqa: PLR5501  # the two fully join
                 if circuit_a == circuit_b:
                     pass  # JK, they're already in the same circuit
                 else:
@@ -94,7 +94,7 @@ def main():
         boxes = [
             tuple(map(int, line.strip().split(",")))
             for line in f
-        ]
+        ]  # fmt: skip
     if any(len(box) != 3 for box in boxes):
         raise ValueError("Expected all box locations to be 3-dimensional")
     solver = Solver(cast(list[Box], boxes))

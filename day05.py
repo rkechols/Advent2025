@@ -46,7 +46,7 @@ def main():
     fresh_count = sum(
         any(id_to_check in r for r in merged_ranges)
         for id_to_check in ids_to_check
-    )
+    )  # fmt: skip
     print(f"{fresh_count = }")
 
     n_fresh_total = sum(len(r) for r in merged_ranges)
